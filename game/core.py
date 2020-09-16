@@ -15,6 +15,7 @@ class tetris:
 		pygame.init()
 	
 	#Draw borders and basic UI borders, make scalable later
+	#TODO: ADD SCORES
 	def init(self, screen):
 		for x in range(self.wd+1):
 			inc = x*self.sz
@@ -24,25 +25,43 @@ class tetris:
 			pygame.draw.line(screen, (169,169,169), (self.pad_x, self.pad_y+inc), (self.pad_x+self.sz*self.wd, self.pad_y+inc))
 		pygame.display.flip()
 
-	def print_array(self):
-		print(self.playArray)
+	def fill(self, x, y, screen):
+		s1 = Square(self.sz)
+		dr_x = self.pad_x + self.sz*x + 1
+		dr_y = self.pad_y + self.sz*y + 1
+		screen.blit(s1.surf, (dr_x, dr_y))
 
+	def delt(self, x, y, screen):
+		s1 = Del_square(self.sz)
+		dr_x = self.pad_x + self.sz*x + 1
+		dr_y = self.pad_y + self.sz*y + 1
+		screen.blit(s1.surf, (dr_x, dr_y))
 
 	def run(self):
 		res = (720, 720)
 		screen = pygame.display.set_mode(res)
 		self.init(screen)
-		s1 = Square(self.sz); _s = Del_square(self.sz);
 		Done = False
-		vert = 0;
+
+		"""
 		while not Done:
-			#For exiting the game
+			#For exiting the game; input parameters go here
 			for event in pygame.event.get():
 				if event.type == KEYDOWN:
 					if event.key == K_BACKSPACE:
 						Done = True
-			screen.blit(s1.surf, (self.pad_x+1,self.pad_y+1+(self.sz)*(vert)))
-			pygame.display.flip()
-			vert=vert+1
-			screen.blit(_s.surf, (self.pad_x+1,self.pad_y+1+(self.sz)*(vert-1)))
-			time.sleep(1)
+		"""
+
+		for x in range(self.wd):
+			for y in range(self.ht):
+				self.fill(x,y,screen)
+				pygame.display.flip()
+				time.sleep(0.03)
+
+		for x in range(self.wd):
+			for y in range(self.ht):
+				self.delt(x,y,screen)
+				pygame.display.flip()
+				time.sleep(0.03)
+
+		
