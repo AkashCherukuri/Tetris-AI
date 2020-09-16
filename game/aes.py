@@ -5,19 +5,15 @@ import pygame
 class Square(pygame.sprite.Sprite): 
     def __init__(self, width = 25): 
         super(Square, self).__init__() 
-   		
-        self.sz = width
-        self.surf = pygame.Surface((width, width)) 
+        self.surf = pygame.Surface((width-1, width-1)) 
           
         self.surf.fill((0, 200, 255)) 
         self.rect = self.surf.get_rect() 
 
-class E_sq(pygame.sprite.Sprite): 
+class Del_square(pygame.sprite.Sprite): 
     def __init__(self, width = 25): 
-        super(E_sq, self).__init__() 
-   		
-        self.sz = width
-        self.surf = pygame.Surface((width, width)) 
+        super(Del_square, self).__init__() 
+        self.surf = pygame.Surface((width-1, width-1)) 
           
         self.surf.fill((0, 0, 0)) 
         self.rect = self.surf.get_rect() 

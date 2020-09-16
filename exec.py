@@ -3,5 +3,4 @@ from game.core import tetris
 
 if __name__ == "__main__":
 	g = tetris()
-	g.init()
 	g.run()
