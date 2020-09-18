@@ -39,9 +39,11 @@ class tetris:
 	def fall_logic(self):
 		fall_block = np.where(self.playArray == 2)
 		y_idx = fall_block[0][::-1]; x_idx = fall_block[1][::-1]
+		if (y_idx.size == 0 and x_idx.size == 0):
+			return True
 		check = False
 		for (x,y) in zip(x_idx,y_idx):
-			if y == self.ht-1:
+			if y == self.ht-1:	
 				self.playArray[y,x] = 1
 				check = True
 			elif self.playArray[y+1,x] == 1:
@@ -175,12 +177,22 @@ class tetris:
 
 
 	def run(self):
+
+		timePerFall = 100
+
 		res = (self.resx, self.resy) #Needs Tweaking
 		screen = pygame.display.set_mode(res)
 		self.init(screen)
 		need_new = True
 
+		time_elapsed_since_last_action = 0
+		clock = pygame.time.Clock()
+
 		while self.state is not State.GAME_END:
+
+			dt = clock.tick()
+			time_elapsed_since_last_action += dt
+
 			#For exiting the game; input parameters go here
 			for event in pygame.event.get():
 				if (event.type == KEYDOWN and event.key == K_BACKSPACE):
@@ -189,25 +201,27 @@ class tetris:
 			if self.state is State.GAME_CONT:
 				self.oldArray = copy.deepcopy(self.playArray)
 			
-			if need_new == True:
-				if self.state is State.GAME_START:
-					self.state = State.GAME_CONT
-				else:
-					self.oldArray = copy.deepcopy(self.playArray)
-				fin = self.spawn(screen)
-				if fin is True:
-					self.state = State.GAME_END
-					continue
-			"""
-			if need_new == True:
-				x = random.randrange(0,self.wd,1)
-				if self.state is State.GAME_START:
-					self.state = State.GAME_CONT
-				else:
-					self.oldArray = copy.deepcopy(self.playArray)
-				self.playArray[0,x] = 2
-			"""
-			need_new = self.fall_logic()
+			if(time_elapsed_since_last_action > timePerFall):
+				need_new = self.fall_logic()
+				if need_new == True:
+					if self.state is State.GAME_START:
+						self.state = State.GAME_CONT
+					else:
+						self.oldArray = copy.deepcopy(self.playArray)
+					fin = self.spawn(screen)
+					if fin is True:
+						self.state = State.GAME_END
+						continue
+				"""
+				if need_new == True:
+					x = random.randrange(0,self.wd,1)
+					if self.state is State.GAME_START:
+						self.state = State.GAME_CONT
+					else:
+						self.oldArray = copy.deepcopy(self.playArray)
+					self.playArray[0,x] = 2
+				"""
+				time_elapsed_since_last_action = 0
 			rem = self.check_last(screen,0)
 			if rem > 0:
 				for i in range(rem):
@@ -215,4 +229,3 @@ class tetris:
 			else:
 				self.draw_grid(screen)
 			pygame.display.flip()
-			time.sleep(0.08	)
