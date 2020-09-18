@@ -67,15 +67,15 @@ class tetris:
 		screen.blit(s1.surf, (dr_x, dr_y))
 
 	def draw_grid(self, screen):
-		new_grid = np.where(self.playArray == 1)
-		y_idx = new_grid[0]; x_idx = new_grid[1]
-		for (x,y) in zip(x_idx,y_idx):
-			self.fill(x,y,screen,1)
-
 		old_grid = np.where(self.oldArray == 2)
 		y_idx = old_grid[0]; x_idx = old_grid[1]
 		for (x,y) in zip(x_idx,y_idx):
 			self.delt(x,y,screen)
+		
+		new_grid = np.where(self.playArray == 1)
+		y_idx = new_grid[0]; x_idx = new_grid[1]
+		for (x,y) in zip(x_idx,y_idx):
+			self.fill(x,y,screen,1)
 
 		new_grid = np.where(self.playArray == 2)
 		y_idx = new_grid[0]; x_idx = new_grid[1]
@@ -134,4 +134,4 @@ class tetris:
 			need_new = self.fall_logic()
 			self.draw_grid(screen)
 			pygame.display.flip()
-			time.sleep(0.1)
+			time.sleep(0.2)
