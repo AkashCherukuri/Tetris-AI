@@ -7,6 +7,8 @@ from .aes import *
 from .states import State, Gen_P, Pc
 from .utils import sh_d_one
 
+colorRGBGrey = (169,169,169)
+
 class tetris:
 	def __init__(self):
 		#Parameters for the board size; maybe add a feature to change board size by exec options?
@@ -27,10 +29,10 @@ class tetris:
 		scrn = Del_square(max(self.resx, self.resy))
 		for x in range(self.wd+1):
 			inc = x*self.sz
-			pygame.draw.line(screen, (169,169,169), (self.pad_x+inc, self.pad_y), (self.pad_x+inc, self.pad_y+self.ht*self.sz))
+			pygame.draw.line(screen, colorRGBGrey, (self.pad_x+inc, self.pad_y), (self.pad_x+inc, self.pad_y+self.ht*self.sz))
 		for y in range(self.ht+1):
 			inc=y*self.sz
-			pygame.draw.line(screen, (169,169,169), (self.pad_x, self.pad_y+inc), (self.pad_x+self.sz*self.wd, self.pad_y+inc))
+			pygame.draw.line(screen, colorRGBGrey, (self.pad_x, self.pad_y+inc), (self.pad_x+self.sz*self.wd, self.pad_y+inc))
 		pygame.display.flip()
 
 	#At the max, we'll have only one moving piece; bool fn
@@ -111,19 +113,52 @@ class tetris:
 		#Python has no switch statement lul; use dict-mapping maybe?
 		
 		if new is Pc.I:
-			for i in range((self.wd//2)-2, (self.wd//2)+2, 1):
+			for i in range((self.wd//2)-2, (self.wd//2)+2):
 				if self.playArray[0,i] == 1:
 					return True
-			for i in range((self.wd//2)-2, (self.wd//2)+2, 1):
+			for i in range((self.wd//2)-2, (self.wd//2)+2):
 				self.playArray[0,i] = 2
 
 		elif new is Pc.O:
-			for i in range((self.wd//2)-1, (self.wd//2)+1, 1):
+			for i in range((self.wd//2)-1, (self.wd//2)+1):
 				if self.playArray[1,i] == 1:
 					return True
-			for i in range((self.wd//2)-1, (self.wd//2)+1, 1):
+			for i in range((self.wd//2)-1, (self.wd//2)+1):
 				self.playArray[0,i] = 2
 				self.playArray[1,i] = 2
+
+		elif new is Pc.T or new is Pc.J or new is Pc.L:
+			for i in range((self.wd//2)-1, (self.wd//2)+2):
+				if self.playArray[1,i] == 1:
+					return True
+			for i in range((self.wd//2)-1, (self.wd//2)+2):
+				self.playArray[1,i] = 2
+			if new is Pc.J:
+				self.playArray[0, (self.wd//2)-1] = 2
+			elif new is Pc.T:
+				self.playArray[0, (self.wd//2)] = 2
+			else:
+				self.playArray[0, (self.wd//2)+1] = 2
+	
+		elif new is Pc.S:
+			for i in range((self.wd//2)-1, (self.wd//2)+1):
+				if self.playArray[1,i] == 1:
+					return True
+			self.playArray[1, (self.wd//2)-1] = 2
+			self.playArray[1, (self.wd//2)] = 2
+			self.playArray[0, (self.wd//2)] = 2
+			self.playArray[0, (self.wd//2)+1] = 2
+
+		elif new is Pc.Z:
+			for i in range((self.wd//2), (self.wd//2)+2):
+				if self.playArray[1,i] == 1:
+					return True
+			self.playArray[1, (self.wd//2)+1] = 2
+			self.playArray[1, (self.wd//2)] = 2
+			self.playArray[0, (self.wd//2)] = 2
+			self.playArray[0, (self.wd//2)-1] = 2			
+
+
 		return False
 	
 	#Remove the last filled line, return number of lines that were filled
@@ -148,9 +183,8 @@ class tetris:
 		while self.state is not State.GAME_END:
 			#For exiting the game; input parameters go here
 			for event in pygame.event.get():
-				if event.type == KEYDOWN:
-					if event.key == K_BACKSPACE:
-						self.state = State.GAME_END
+				if (event.type == KEYDOWN and event.key == K_BACKSPACE):
+					self.state = State.GAME_END		#exits if backspace tapped
 
 			if self.state is State.GAME_CONT:
 				self.oldArray = copy.deepcopy(self.playArray)
@@ -181,4 +215,4 @@ class tetris:
 			else:
 				self.draw_grid(screen)
 			pygame.display.flip()
-			time.sleep(0.03)
+			time.sleep(0.08	)
