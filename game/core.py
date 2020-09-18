@@ -44,10 +44,8 @@ class tetris:
 		check = False
 		for (x,y) in zip(x_idx,y_idx):
 			if y == self.ht-1:	
-				self.playArray[y,x] = 1
 				check = True
 			elif self.playArray[y+1,x] == 1:
-				self.playArray[y,x] = 1
 				check = True
 
 		if check is True:
@@ -56,8 +54,10 @@ class tetris:
 			return True
 
 		for (x,y) in zip(x_idx,y_idx):
-			self.playArray[y+1,x] = 2
 			self.playArray[y,x] = 0
+		for (x,y) in zip(x_idx,y_idx):
+			self.playArray[y+1,x] = 2
+
 		return False
 
 	def fill(self, x, y, screen, par):
@@ -175,10 +175,52 @@ class tetris:
 			return self.check_last(screen, cnt+1)
 		return cnt
 
+	def move_left(self):
+		fall_block = np.where(self.playArray == 2)
+		y_idx = fall_block[0][::-1]; x_idx = fall_block[1][::-1]
+		if (y_idx.size == 0 and x_idx.size == 0):
+			return True
+		check = False
+		for (x,y) in zip(x_idx,y_idx):
+			if (x == 0 or self.playArray[y,x-1] == 1):
+				check = True
+
+		if check is True:
+			return True
+
+		for (x,y) in zip(x_idx,y_idx):
+			self.playArray[y,x] = 0
+		for (x,y) in zip(x_idx,y_idx):
+			self.playArray[y,x-1] = 2
+
+		print(self.oldArray)
+		print(self.playArray)
+
+		return False
+
+	def move_right(self):
+		fall_block = np.where(self.playArray == 2)
+		y_idx = fall_block[0][::-1]; x_idx = fall_block[1][::-1]
+		if (y_idx.size == 0 and x_idx.size == 0):
+			return True
+		check = False
+		for (x,y) in zip(x_idx,y_idx):
+			if (x == self.wd-1 or self.playArray[y,x+1] == 1):
+				check = True
+
+		if check is True:
+			return True
+
+		for (x,y) in zip(x_idx,y_idx):
+			self.playArray[y,x] = 0
+		for (x,y) in zip(x_idx,y_idx):
+			self.playArray[y,x+1] = 2
+
+		return False
 
 	def run(self):
 
-		timePerFall = 100
+		timePerFall = 350
 
 		res = (self.resx, self.resy) #Needs Tweaking
 		screen = pygame.display.set_mode(res)
@@ -193,14 +235,23 @@ class tetris:
 			dt = clock.tick()
 			time_elapsed_since_last_action += dt
 
+			if self.state is State.GAME_CONT:
+				self.oldArray = copy.deepcopy(self.playArray)
+
+
 			#For exiting the game; input parameters go here
 			for event in pygame.event.get():
-				if (event.type == KEYDOWN and event.key == K_BACKSPACE):
-					self.state = State.GAME_END		#exits if backspace tapped
+				if (event.type == KEYDOWN): 
+					if (event.key == K_BACKSPACE):
+						self.state = State.GAME_END	#exits if backspace tapped
+					if (event.key == K_LEFT):
+						self.move_left()
+					if (event.key == K_RIGHT):
+						self.move_right()
 
 			if self.state is State.GAME_CONT:
 				self.oldArray = copy.deepcopy(self.playArray)
-			
+
 			if(time_elapsed_since_last_action > timePerFall):
 				need_new = self.fall_logic()
 				if need_new == True:
