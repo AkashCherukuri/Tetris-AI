@@ -5,6 +5,7 @@ import itertools
 from pygame.locals import *
 from .aes import *
 from .states import State, Gen_P, Pc
+from .utils import sh_d_one
 
 class tetris:
 	def __init__(self):
@@ -13,15 +14,17 @@ class tetris:
 		self.ht = 20
 		self.sz = 25  #Size of each indiv block
 		self.pad_x = 40; self.pad_y = 40;
+		self.resx = 720; self.resy = 720;
 		self.playArray = np.zeros((self.ht, self.wd))		#0-Empty, (1)-Placed, 2-Moving
 		self.oldArray = np.zeros((self.ht, self.wd))		#For erasing earlier grid
 		self.state = State.GAME_START
 		self.piece = Gen_P()
 		pygame.init()
 	
-	#Draw borders and basic UI borders, make scalable later
+	#Draw borders and basic UI borders
 	#TODO: ADD SCORES
 	def init(self, screen):
+		scrn = Del_square(max(self.resx, self.resy))
 		for x in range(self.wd+1):
 			inc = x*self.sz
 			pygame.draw.line(screen, (169,169,169), (self.pad_x+inc, self.pad_y), (self.pad_x+inc, self.pad_y+self.ht*self.sz))
@@ -31,7 +34,6 @@ class tetris:
 		pygame.display.flip()
 
 	#At the max, we'll have only one moving piece; bool fn
-	#DEBUG TO CHANGE ALL 2 to 1
 	def fall_logic(self):
 		fall_block = np.where(self.playArray == 2)
 		y_idx = fall_block[0][::-1]; x_idx = fall_block[1][::-1]
@@ -82,6 +84,27 @@ class tetris:
 		for (x,y) in zip(x_idx,y_idx):
 			self.fill(x,y,screen,2)
 
+	def shift_grid(self, screen):
+		old_grid = np.where(self.oldArray == 2)
+		y_idx = old_grid[0]; x_idx = old_grid[1]
+		for (x,y) in zip(x_idx,y_idx):
+			self.delt(x,y,screen)
+
+		old_grid = np.where(self.oldArray == 1)
+		y_idx = old_grid[0]; x_idx = old_grid[1]
+		for (x,y) in zip(x_idx,y_idx):
+			self.delt(x,y,screen)
+		
+		new_grid = np.where(self.playArray == 1)
+		y_idx = new_grid[0]; x_idx = new_grid[1]
+		for (x,y) in zip(x_idx,y_idx):
+			self.fill(x,y,screen,1)
+
+		new_grid = np.where(self.playArray == 2)
+		y_idx = new_grid[0]; x_idx = new_grid[1]
+		for (x,y) in zip(x_idx,y_idx):
+			self.fill(x,y,screen,2)
+
 	#return False if successful, else return True to indicate GameOver
 	def spawn(self, screen):
 		new = self.piece.give()
@@ -102,10 +125,22 @@ class tetris:
 				self.playArray[0,i] = 2
 				self.playArray[1,i] = 2
 		return False
-		
+	
+	#Remove the last filled line, return number of lines that were filled
+	def check_last(self, screen, cnt):
+		fill = True
+		for x in range(self.wd):
+			if self.playArray[self.ht-1, x] != 1:
+				fill = False
+				break
+		if fill:
+			sh_d_one(self.playArray, self.ht, self.wd)
+			return self.check_last(screen, cnt+1)
+		return cnt
+
 
 	def run(self):
-		res = (720, 720) #Needs Tweaking
+		res = (self.resx, self.resy) #Needs Tweaking
 		screen = pygame.display.set_mode(res)
 		self.init(screen)
 		need_new = True
@@ -119,7 +154,7 @@ class tetris:
 
 			if self.state is State.GAME_CONT:
 				self.oldArray = copy.deepcopy(self.playArray)
-
+			
 			if need_new == True:
 				if self.state is State.GAME_START:
 					self.state = State.GAME_CONT
@@ -129,9 +164,21 @@ class tetris:
 				if fin is True:
 					self.state = State.GAME_END
 					continue
-
-
+			"""
+			if need_new == True:
+				x = random.randrange(0,self.wd,1)
+				if self.state is State.GAME_START:
+					self.state = State.GAME_CONT
+				else:
+					self.oldArray = copy.deepcopy(self.playArray)
+				self.playArray[0,x] = 2
+			"""
 			need_new = self.fall_logic()
-			self.draw_grid(screen)
+			rem = self.check_last(screen,0)
+			if rem > 0:
+				for i in range(rem):
+					self.shift_grid(screen)
+			else:
+				self.draw_grid(screen)
 			pygame.display.flip()
-			time.sleep(0.2)
+			time.sleep(0.03)
