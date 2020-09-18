@@ -47,7 +47,7 @@ class tetris:
 		if check is True:
 			for (x,y) in zip(x_idx,y_idx):
 				self.playArray[y,x] = 1
-				return True
+			return True
 
 		for (x,y) in zip(x_idx,y_idx):
 			self.playArray[y+1,x] = 2
@@ -67,11 +67,6 @@ class tetris:
 		screen.blit(s1.surf, (dr_x, dr_y))
 
 	def draw_grid(self, screen):
-		new_grid = np.where(self.playArray == 2)
-		y_idx = new_grid[0]; x_idx = new_grid[1]
-		for (x,y) in zip(x_idx,y_idx):
-			self.fill(x,y,screen,2)
-
 		new_grid = np.where(self.playArray == 1)
 		y_idx = new_grid[0]; x_idx = new_grid[1]
 		for (x,y) in zip(x_idx,y_idx):
@@ -82,20 +77,24 @@ class tetris:
 		for (x,y) in zip(x_idx,y_idx):
 			self.delt(x,y,screen)
 
+		new_grid = np.where(self.playArray == 2)
+		y_idx = new_grid[0]; x_idx = new_grid[1]
+		for (x,y) in zip(x_idx,y_idx):
+			self.fill(x,y,screen,2)
+
 	#return False if successful, else return True to indicate GameOver
 	def spawn(self, screen):
 		new = self.piece.give()
 		#Python has no switch statement lul; use dict-mapping maybe?
 		
-		if True:
+		if new is Pc.I:
 			for i in range((self.wd//2)-2, (self.wd//2)+2, 1):
 				if self.playArray[0,i] == 1:
 					return True
 			for i in range((self.wd//2)-2, (self.wd//2)+2, 1):
 				self.playArray[0,i] = 2
 
-		"""
-		if True:
+		elif new is Pc.O:
 			for i in range((self.wd//2)-1, (self.wd//2)+1, 1):
 				if self.playArray[1,i] == 1:
 					return True
@@ -103,7 +102,7 @@ class tetris:
 				self.playArray[0,i] = 2
 				self.playArray[1,i] = 2
 		return False
-		"""
+		
 
 	def run(self):
 		res = (720, 720) #Needs Tweaking
@@ -135,4 +134,4 @@ class tetris:
 			need_new = self.fall_logic()
 			self.draw_grid(screen)
 			pygame.display.flip()
-			time.sleep(0.3)
+			time.sleep(0.1)
