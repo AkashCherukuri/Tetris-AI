@@ -124,15 +124,35 @@ class T_bot(tetris):
 		return False
 
 	def hole_height(self, arr):
+		if self.check_last(self.screen, arr) > 0:
+			compl_rew = -50
+
 		arr = numpy.transpose(arr)
 		cnt = 0
-		height = 0
+		compl_rew = 0
+		diff=[]; ho_val = []; tmp = []
+		val = []
+
 		for i in range(self.wd):
-			tmp = numpy.trim_zeros(arr[i], 'f')
-			if len(tmp) > height:
-				height = len(tmp)
-			cnt = cnt + numpy.count_nonzero(tmp==0)
-		return (cnt, height)
+			tmp.append(numpy.trim_zeros(arr[i], 'f'))
+			val.append(len(tmp[-1]))
+
+			cnt = cnt + numpy.count_nonzero(tmp[-1]==0)			#This calc of holes is problematic
+
+		for i in range(self.wd):
+			for j in range(self.ht-1, self.ht-1-len(tmp[i]), -1):
+				if i > 0 and i < (self.wd-1):
+					if arr[i][j]==0 and arr[i-1][j]==1 and arr[i+1][j]==1:
+						cnt+=4
+				elif i == 0:
+					if arr[i][j]==0 and arr[i+1][j]==1:
+						cnt+=4
+				elif i == self.wd-1:
+					if arr[i][j]==0 and arr[i-1][j]==1:
+						cnt+=4
+
+
+		return (cnt, max(val), max(val)-min(val), compl_rew)
 
 	def simulate_1(self, pc):
 		poss = []
@@ -179,9 +199,11 @@ class T_bot(tetris):
 				while not self.fall_logic(arr):
 					continue
 
-				hl, htmp = self.hole_height(arr)
-				x1 = 2; x2 = 5
-				calc = x1*hl + x2*htmp
+				hl, htmp, diff, rew = self.hole_height(arr)
+				x1 = 18; x2 = 11; x3 = 0
+				if diff > 3:
+					x3 = 18
+				calc = x1*hl + x2*htmp + x3*diff + rew
 				if calc < value[2]:
 					value = [pc, i, calc]
 				i+=1
@@ -192,6 +214,7 @@ class T_bot(tetris):
 	def run(self):
 		res = (self.resx, self.resy) #Needs Tweaking
 		screen = pygame.display.set_mode(res)
+		self.screen = screen
 		self.init(screen)
 		need_new = True
 
@@ -220,7 +243,7 @@ class T_bot(tetris):
 				self.draw_grid(screen, rem)
 				self.oldArray = copy.deepcopy(self.playArray)
 				pygame.display.flip()
-				time.sleep(0.1)
+				time.sleep(0.03)
 
 			"""
 			move = None

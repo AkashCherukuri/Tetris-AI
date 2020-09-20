@@ -123,19 +123,21 @@ class tetris:
 		return False
 	
 	#Remove the last filled line, return number of lines that were filled
-	def check_last(self, screen):
+	def check_last(self, screen, arr = None):
+		if arr is None:
+			arr = self.playArray
 		res = []
 		#You can probably make this more compact, Amit
 		for i in range(self.ht):
 			ch = True
 			for j in range(self.wd):
-				if self.playArray[i,j] != 1:
+				if arr[i,j] != 1:
 					ch = False
 					break
 			if ch:
 				res.append(i)
 		for idx in res:
-			sh_d_one(self.playArray, self.wd, idx)
+			sh_d_one(arr, self.wd, idx)
 		return len(res)
 
 	#At the max, we'll have only one moving piece; bool fn
