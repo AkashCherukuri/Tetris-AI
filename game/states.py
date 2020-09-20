@@ -6,6 +6,12 @@ class State(Enum):
 	GAME_CONT = 1
 	GAME_END = 2
 
+class Move(Enum):
+	Down = 0
+	Left = 1
+	Right = 2
+	Rotate = 3
+
 class Pc(Enum):
 	I=0; O=1; T=2; S=3; Z=4; J=5; L=6;
 
