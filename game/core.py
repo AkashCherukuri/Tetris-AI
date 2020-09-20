@@ -124,17 +124,20 @@ class tetris:
 		return False
 	
 	#Remove the last filled line, return number of lines that were filled
-	#TODO: Checks only last row
-	def check_last(self, screen, cnt):
-		fill = True
-		for x in range(self.wd):
-			if self.playArray[self.ht-1, x] != 1:
-				fill = False
-				break
-		if fill:
-			sh_d_one(self.playArray, self.ht, self.wd)
-			return self.check_last(screen, cnt+1)
-		return cnt
+	def check_last(self, screen):
+		res = []
+		#You can probably make this more compact, Amit
+		for i in range(self.ht):
+			ch = True
+			for j in range(self.wd):
+				if self.playArray[i,j] != 1:
+					ch = False
+					break
+			if ch:
+				res.append(i)
+		for idx in res:
+			sh_d_one(self.playArray, self.wd, idx)
+		return len(res)
 
 	#At the max, we'll have only one moving piece; bool fn
 	def fall_logic(self):
@@ -233,6 +236,12 @@ class tetris:
 					if (event.key == K_RIGHT):
 						self.move_right()
 						move = Move.Right
+					#Hard Dropping
+					if (event.key == K_DOWN):
+						stop = False
+						while not stop:
+							stop = self.fall_logic()
+						time_elapsed_since_last_action = timePerFall
 
 			if(time_elapsed_since_last_action > timePerFall):
 				need_new = self.fall_logic()
@@ -255,6 +264,6 @@ class tetris:
 					self.playArray[0,x] = 2
 				"""
 				time_elapsed_since_last_action = 0
-			rem = self.check_last(screen,0)
+			rem = self.check_last(screen)
 			self.draw_grid(screen, rem)
 			pygame.display.flip()
