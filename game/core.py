@@ -120,7 +120,6 @@ class tetris:
 			self.playArray[0, (self.wd//2)] = 2
 			self.playArray[0, (self.wd//2)-1] = 2			
 
-
 		return False
 	
 	#Remove the last filled line, return number of lines that were filled
@@ -140,8 +139,10 @@ class tetris:
 		return len(res)
 
 	#At the max, we'll have only one moving piece; bool fn
-	def fall_logic(self):
-		fall_block = np.where(self.playArray == 2)
+	def fall_logic(self, arr = None):
+		if arr is None:
+			arr = self.playArray
+		fall_block = np.where(arr == 2)
 		y_idx = fall_block[0][::-1]; x_idx = fall_block[1][::-1]
 		if (y_idx.size == 0 and x_idx.size == 0):
 			return True
@@ -149,57 +150,61 @@ class tetris:
 		for (x,y) in zip(x_idx,y_idx):
 			if y == self.ht-1:	
 				check = True
-			elif self.playArray[y+1,x] == 1:
+			elif arr[y+1,x] == 1:
 				check = True
 
 		if check is True:
 			for (x,y) in zip(x_idx,y_idx):
-				self.playArray[y,x] = 1
+				arr[y,x] = 1
 			return True
 
 		for (x,y) in zip(x_idx,y_idx):
-			self.playArray[y,x] = 0
+			arr[y,x] = 0
 		for (x,y) in zip(x_idx,y_idx):
-			self.playArray[y+1,x] = 2
+			arr[y+1,x] = 2
 		return False
 
-	def move_left(self):
-		fall_block = np.where(self.playArray == 2)
+	def move_left(self, arr = None):
+		if arr is None:
+			arr = self.playArray
+		fall_block = np.where(arr == 2)
 		y_idx = fall_block[0][::-1]; x_idx = fall_block[1][::-1]
 		if (y_idx.size == 0 and x_idx.size == 0):
 			return True
 		check = False
 		for (x,y) in zip(x_idx,y_idx):
-			if (x == 0 or self.playArray[y,x-1] == 1):
+			if (x == 0 or arr[y,x-1] == 1):
 				check = True
 
 		if check is True:
 			return True
 
 		for (x,y) in zip(x_idx,y_idx):
-			self.playArray[y,x] = 0
+			arr[y,x] = 0
 		for (x,y) in zip(x_idx,y_idx):
-			self.playArray[y,x-1] = 2
+			arr[y,x-1] = 2
 
 		return False
 
-	def move_right(self):
-		fall_block = np.where(self.playArray == 2)
+	def move_right(self, arr = None):
+		if arr is None:
+			arr = self.playArray
+		fall_block = np.where(arr == 2)
 		y_idx = fall_block[0][::-1]; x_idx = fall_block[1][::-1]
 		if (y_idx.size == 0 and x_idx.size == 0):
 			return True
 		check = False
 		for (x,y) in zip(x_idx,y_idx):
-			if (x == self.wd-1 or self.playArray[y,x+1] == 1):
+			if (x == self.wd-1 or arr[y,x+1] == 1):
 				check = True
 
 		if check is True:
 			return True
 
 		for (x,y) in zip(x_idx,y_idx):
-			self.playArray[y,x] = 0
+			arr[y,x] = 0
 		for (x,y) in zip(x_idx,y_idx):
-			self.playArray[y,x+1] = 2
+			arr[y,x+1] = 2
 
 		return False
 
