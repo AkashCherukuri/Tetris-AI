@@ -2,6 +2,7 @@ from game.core import tetris
 from game.states import PcR, Pc, State
 import pygame, random, copy, time, numpy
 from pygame.locals import *
+#from collections import deque
 
 class T_bot(tetris):
 	def __init__(self):
@@ -132,11 +133,55 @@ class T_bot(tetris):
 		diff=[]; ho_val = []; tmp = []
 		val = []
 
+		# def isSafe(mat, x, y, processed):
+		# 	return ((x >= 0) and (x < self.wd) and (y >= 0) and (y < self.ht) and (mat[x][y] == 0 and not processed[x][y]))
+
+		# def search(mat, processed, i, j):
+		# 	res = 0
+		# 	row = [-1,0,0,1]
+		# 	col = [0,-1,1,0]
+		# 	if(isSafe(mat, i, j, processed)):
+		# 		res += 1
+		# 		for k in range(4):
+		# 			res += search(mat, processed, i+row[k], j+row[k])
+		# 	return res
+
+		# def BFS(mat, processed, i, j):
+		# 	res = 0
+		# 	row = [-1,0,0,1]
+		# 	col = [0,-1,1,0]
+		# 	q = deque()
+		# 	q.append((i, j))
+		# 	processed[i][j] = True
+		# 	while q:
+		# 		x, y = q.popleft()
+		# 		print(x,y)
+		# 		for k in range(4):
+		# 			if isSafe(mat, x + row[k], y + col[k], processed):
+		# 				processed[x + row[k]][y + col[k]] = True
+		# 				q.append((x + row[k], y + col[k]))
+		# 				res += 1
+		# 	print(res)
+		# 	return res
+
+		
+		# cnt = 0
+		# tempArr = arr.tolist()
+		# processed = [[False for x in range(self.ht)] for y in range(self.wd)]
+		# for i in range(self.wd):
+		# 	if tempArr[i][0] == 0:
+		# 		cnt -= BFS(tempArr, processed, i, 0)
+		# 		break
+
+		# processed = [[False for x in range(self.ht)] for y in range(self.wd)]
+		# res = 0
+		# res += search(arr, processed, 0, 0)
+
 		for i in range(self.wd):
 			tmp.append(numpy.trim_zeros(arr[i], 'f'))
 			val.append(len(tmp[-1]))
+			cnt = cnt + numpy.count_nonzero(tmp[-1]==0)		#This calc of holes is problematic
 
-			cnt = cnt + numpy.count_nonzero(tmp[-1]==0)			#This calc of holes is problematic
 
 		for i in range(self.wd):
 			for j in range(self.ht-1, self.ht-1-len(tmp[i]), -1):
