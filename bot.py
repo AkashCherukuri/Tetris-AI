@@ -37,7 +37,6 @@ class T_bot(tetris):
 			for i in range((self.wd//2)-1, (self.wd//2)+2):
 				if arr[1,i] == 1:
 					return True
-			for i in range((self.wd//2)-1, (self.wd//2)+2):
 				arr[1,i] = 2
 			if new is PcR.J1:
 				arr[0, (self.wd//2)-1] = 2
@@ -53,11 +52,11 @@ class T_bot(tetris):
 			for i in range((self.wd//2)-1, (self.wd//2)+2):
 				arr[0,i] = 2
 			if new is PcR.J3:
-				arr[1, (self.wd//2)-1] = 2
+				arr[1, (self.wd//2)+1] = 2
 			elif new is PcR.T3:
 				arr[1, (self.wd//2)] = 2
 			else:
-				arr[1, (self.wd//2)+1] = 2
+				arr[1, (self.wd//2)-1] = 2
 
 		elif new is PcR.T2 or new is PcR.J2 or new is PcR.L2:
 			for i in range((self.wd//2)-1, (self.wd//2)+1):	#OverChecking here, but if the ai got to that point, its pretty bad
@@ -66,11 +65,11 @@ class T_bot(tetris):
 			for i in range(3):
 				arr[i,self.wd//2] = 2
 			if new is PcR.J2:
-				arr[0, (self.wd//2)-1] = 2
+				arr[2, (self.wd//2)-1] = 2
 			elif new is PcR.T2:
 				arr[1, (self.wd//2)-1] = 2
 			else:
-				arr[2, (self.wd//2)-1] = 2
+				arr[0, (self.wd//2)-1] = 2
 
 		elif new is PcR.T4 or new is PcR.J4 or new is PcR.L4:
 			for i in range((self.wd//2)-1, (self.wd//2)+1):	#OverChecking here, but if the ai got to that point, its pretty bad
@@ -186,7 +185,7 @@ class T_bot(tetris):
 		return self.simulate_2(poss)
 
 	def simulate_2(self, poss):
-		value = [0, 0, 1000]
+		value = [0, 0, 1000, 0]
 		for pc in poss:
 			spawn = copy.deepcopy(self.playArray)
 			self.spawn_w_rot(pc, spawn)
@@ -196,16 +195,17 @@ class T_bot(tetris):
 			while True:
 				arr = copy.deepcopy(spawn)
 
+				fallNumber = 0
 				while not self.fall_logic(arr):
-					continue
+					fallNumber += 1
 
 				hl, htmp, diff, rew = self.hole_height(arr)
 				x1 = 18; x2 = 11; x3 = 0
 				if diff > 3:
 					x3 = 18
 				calc = x1*hl + x2*htmp + x3*diff + rew
-				if calc < value[2]:
-					value = [pc, i, calc]
+				if calc < value[2] or (calc <= value[2]+4 and fallNumber > value[3]):
+					value = [pc, i, calc, fallNumber]
 				i+=1
 				if self.move_right(spawn):
 					break
@@ -219,17 +219,15 @@ class T_bot(tetris):
 		need_new = True
 
 		while self.state is not State.GAME_END:
-
 			for event in pygame.event.get():
-				if (event.type == KEYDOWN): 
-					if (event.key == K_BACKSPACE):
-						self.state = State.GAME_END	#exits if backspace tapped
+				if (event.type == KEYDOWN and event.key == K_BACKSPACE): 
+					self.state = State.GAME_END	#exits if backspace tapped
 
 			piece = self.piece.give()
 			value = self.simulate_1(piece)
 
 			spwn = self.spawn_w_rot(value[0])
-			if spwn is True:
+			if spwn:
 				break
 
 			while not self.move_left():
@@ -244,47 +242,3 @@ class T_bot(tetris):
 				self.oldArray = copy.deepcopy(self.playArray)
 				pygame.display.flip()
 				time.sleep(0.03)
-
-			"""
-			move = None
-
-			#For exiting the game; input parameters go here
-			for event in pygame.event.get():
-				if (event.type == KEYDOWN): 
-					if (event.key == K_BACKSPACE):
-						self.state = State.GAME_END	#exits if backspace tapped
-					if (event.key == K_LEFT):
-						self.move_left()
-						move = Move.Left
-					if (event.key == K_RIGHT):
-						self.move_right()
-						move = Move.Right
-					#Hard Dropping
-					if (event.key == K_DOWN):
-						stop = False
-						while not stop:
-							stop = self.fall_logic()
-						time_elapsed_since_last_action = timePerFall
-			
-
-			if(time_elapsed_since_last_action > timePerFall):
-				need_new = self.fall_logic()
-				if need_new == True:
-					if self.state is State.GAME_START:
-						self.state = State.GAME_CONT
-					else:
-						self.oldArray = copy.deepcopy(self.playArray)
-					fin = self.spawn(screen)
-					if fin is True:
-						self.state = State.GAME_END
-						continue
-			"""
-			"""
-				if need_new == True:
-					x = random.randrange(0,self.wd,1)
-					if self.state is State.GAME_START:
-						self.state = State.GAME_CONT
-					else:
-						self.oldArray = copy.deepcopy(self.playArray)
-					self.playArray[0,x] = 2
-			"""
